@@ -3,124 +3,211 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>三國幻戰 - 序列對照工具</title>
+    <title>三國幻戰 - 序列對照工具 Pro Tab</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root { --primary: #1a73e8; --predict: #ffe4e8; --border: #dadce0; --bg: #f8f9fa; --reset: #5f6368; --highlight-red: #d93025; }
+        :root { 
+            --primary: #0088a8; 
+            --primary-hover: #3558d6;
+            --predict-bg: #ffddaa; 
+            --predict-border: #ff7700;
+            --border: #e2e8f0; 
+            --bg: #f1f5f9; 
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --highlight-red: #ff5511; 
+            --match-bg: #cceeff;
+            --match-border: #0088a8;
+        }
         
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        body { 
+            font-family: 'Segoe UI', -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text-main);
+            margin: 0; 
+            padding: 0; 
+            -webkit-font-smoothing: antialiased;
+        }
         
-        /* 頂部固定區塊 */
         .sticky-top {
             position: sticky;
             top: 0;
             z-index: 1000;
-            background: var(--bg);
-            padding: 10px 10px 15px 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            border-bottom: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 15px 15px 10px 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
         }
 
-        header { text-align: center; padding: 5px 0 10px 0; }
-        h1 { margin: 0; color: #333; font-size: 24px; letter-spacing: 2px; }
+        header { text-align: center; margin-bottom: 15px; }
+        h1 { margin: 0; font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px;}
         
-        .container { max-width: 900px; margin: auto; width: 100%; }
+        .search-section { background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
+        .search-grid { display: flex; gap: 12px; align-items: center; }
+        .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
         
-        /* 搜尋區 */
-        .search-section { background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
-        .search-grid { display: flex; gap: 10px; align-items: flex-start; }
-        .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .input-wrapper { position: relative; width: 100%; }
-        
-        input { width: 100%; box-sizing: border-box; padding: 12px; border: 2px solid var(--border); border-radius: 8px; font-size: 16px; outline: none; transition: border-color 0.2s; }
-        input:focus { border-color: var(--primary); }
-        
-        .reset-btn { padding: 12px 20px; border-radius: 8px; border: none; background: var(--reset); color: white; cursor: pointer; font-size: 15px; font-weight: bold; flex-shrink: 0; transition: background 0.2s; }
-        .reset-btn:hover { background: #3c4043; }
+        .input-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; }
+        .mic-btn { position: absolute; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
+        .mic-btn.recording { color: var(--highlight-red); animation: pulse 1.5s infinite; }
 
-        /* 結果顯示區域 */
-        #resultsWrapper { padding: 20px 10px 40px 10px; display: flex; flex-direction: column; gap: 25px; max-width: 900px; margin: auto; }
+        input { 
+            width: 100%; box-sizing: border-box; padding: 14px 40px; 
+            border: 2px solid var(--border); border-radius: 12px; 
+            font-size: 15px; outline: none; transition: all 0.3s ease; 
+            background: #f8fafc;
+        }
+        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(71, 114, 250, 0.1); }
         
-        /* 獨立結果面板 */
-        .result-panel { background: white; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; height: 450px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
-        .panel-header { padding: 10px 15px; background: #e8f0fe; color: #1967d2; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--border); }
+        .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn { padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-search { background: var(--primary); color: white; }
+        .btn-reset { background: #e2e8f0; color: var(--text-main); }
+
+        .tabs-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .tab-btn {
+            padding: 8px 20px;
+            background: #e2e8f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(71, 114, 250, 0.3);
+        }
+
+        #resultsWrapper { padding: 10px 15px 60px 15px; max-width: 900px; margin: auto; }
         
-        .scroll-window { flex-grow: 1; overflow-y: auto; padding: 12px; scroll-behavior: smooth; }
-        .sequence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        .result-panel { 
+            display: none; 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            border: 1px solid var(--border); 
+            height: 500px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04); 
+            overflow: hidden; 
+            animation: slideUp 0.4s ease-out; 
+        }
+        .result-panel.active { display: flex; flex-direction: column; }
+
+        .panel-header { padding: 15px 20px; background: var(--match-bg); border-bottom: 1px solid var(--match-border); display: flex; justify-content: space-between; align-items: center; }
+        .panel-title { color: var(--match-border); font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+        .predict-badge { background: var(--highlight-red); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
+        
+        .scroll-window { flex-grow: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
+        .sequence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
         @media (min-width: 600px) { .sequence-grid { grid-template-columns: repeat(4, 1fr); } }
 
-        .item-card { border: 1px solid #eee; padding: 10px; border-radius: 8px; background: #fafafa; font-size: 13px; }
-        .id-tag { font-size: 10px; color: #999; display: block; }
+        .item-card { border: 1px solid var(--border); padding: 12px; border-radius: 10px; background: #fafafa; font-size: 14px; position: relative; }
+        .id-tag { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 600; }
+        .special-name { color: var(--highlight-red); font-weight: 800; }
         
-        /* 紅色標註武將樣式 */
-        .special-name { color: var(--highlight-red); font-weight: bold; }
-        
-        /* 高亮狀態樣式 */
-        .match-active { border: 2px solid var(--primary) !important; background: #e8f0fe !important; }
-        .predict-active { background: var(--predict) !important; border-color: #ffccd5 !important; border-width: 2px; }
+        .match-active { border: 2px solid var(--match-border) !important; background: var(--match-bg) !important; z-index: 1; }
+        .predict-active { background: var(--predict-bg) !important; border: 2px solid var(--predict-border) !important; transform: scale(1.05); z-index: 2; box-shadow: 0 4px 15px rgba(255, 77, 109, 0.2); }
 
-        /* 下拉建議 */
-        .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); z-index: 2000; max-height: 200px; overflow-y: auto; border-radius: 8px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .suggest-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
-        .suggest-item:hover { background: #f8f9fa; color: var(--primary); }
+        .suggestions { position: absolute; top: calc(100% + 5px); left: 0; right: 0; background: var(--card-bg); border: 1px solid var(--border); z-index: 2000; max-height: 250px; overflow-y: auto; border-radius: 12px; display: none; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .suggest-item { padding: 12px 20px; cursor: pointer; font-size: 15px; }
+        .suggest-item:hover { background: var(--match-bg); color: var(--primary); }
+
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
 <div class="sticky-top">
     <header>
-        <h1>三國幻戰 4彈</h1>
+        <h1><i class="fa-solid fa-gamepad"></i> 三國幻戰 4彈</h1>
     </header>
     <div class="search-section">
         <div class="search-grid">
             <div class="inputs-group">
                 <div class="input-wrapper">
-                    <input type="text" id="input1" placeholder="第一筆 (例如:人-夏侯惇)" autocomplete="off">
+                    <i class="fa-solid fa-magnifying-glass input-icon"></i>
+                    <input type="text" id="input1" placeholder="第一張" autocomplete="off">
+                    <button class="mic-btn" id="mic1" title="語音輸入"><i class="fa-solid fa-microphone"></i></button>
                     <div id="list1" class="suggestions"></div>
                 </div>
                 <div class="input-wrapper">
-                    <input type="text" id="input2" placeholder="第二筆" autocomplete="off">
+                    <i class="fa-solid fa-layer-group input-icon"></i>
+                    <input type="text" id="input2" placeholder="第二張" autocomplete="off" onfocus="this.value=''">
+                    <button class="mic-btn" id="mic2" title="語音輸入"><i class="fa-solid fa-microphone"></i></button>
                     <div id="list2" class="suggestions"></div>
                 </div>
             </div>
-            <button class="reset-btn" onclick="resetAll()">重置</button>
+            <div class="action-btns">
+                <button class="btn btn-search" onclick="triggerSearch()"><i class="fa-solid fa-crosshairs"></i> 定位</button>
+                <button class="btn btn-reset" onclick="resetAll()"><i class="fa-solid fa-rotate-right"></i> 重置</button>
+            </div>
         </div>
+        <div id="tabsContainer" class="tabs-container"></div>
     </div>
 </div>
 
 <div id="resultsWrapper">
-    <div style="text-align:center; color:#999; margin-top:60px;">
-        請輸入查詢內容，指定武將將以紅色標註<br>
-        (往下滾動時，搜尋列會固定在最上方)
+    <div style="text-align:center; color:#94a3b8; margin-top:100px;">
+        <i class="fa-solid fa-chart-line" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
+        <div>請輸入連兩筆抽取紀錄以定位序列</div>
     </div>
 </div>
 
 <script>
     const dataObj = { 1: "技-瞬移暴擊", 2: "人-大喬", 3: "寵-閃炫獅", 4: "技-翻天覆地", 5: "人-夏侯惇", 6: "技-百花飄零", 7: "人-左慈", 8: "技-笑裡藏刀", 9: "人-甘寧", 10: "技-草船借箭", 11: "人-袁紹", 12: "寵-炎鹿", 13: "技-輕勇飛鈴", 14: "人-小喬", 15: "技-地火轟雷", 16: "人-甄宓", 17: "技-天妒纏鎖", 18: "人-張郃", 19: "技-橫槍躍馬", 20: "人-郭嘉", 21: "寵-震天虎", 22: "技-電閃雷鳴", 23: "人-孫尚香", 24: "技-如火燎原", 25: "人-關銀屏", 26: "技-蝶影飛舞", 27: "人-馬雲祿", 28: "技-威震蒼穹", 29: "人-祝融", 30: "寵-寒刺熊", 31: "技-風捲殘雲", 32: "人-曹焱兵", 33: "技-草船借箭", 34: "人-袁紹", 35: "技-輕勇飛鈴", 36: "人-周泰", 37: "技-威震蒼穹", 38: "人-大喬", 39: "寵-震天虎", 40: "技-翻天覆地", 41: "人-張郃", 42: "技-蝶影飛舞", 43: "人-步練師", 44: "技-電閃雷鳴", 45: "人-馬超", 46: "技-怒髮衝冠", 47: "人-關銀屏", 48: "寵-炎鹿", 49: "技-瞬移暴擊", 50: "人-左慈", 51: "技-地火轟雷", 52: "人-貂蟬", 53: "技-如火燎原", 54: "人-呂玲綺", 55: "技-烈刃之息", 56: "寵-閃炫獅", 57: "人-關羽", 58: "技-嶄露鋒芒", 59: "人-甄宓", 60: "技-雪羽飄零", 61: "人-夏侯惇", 62: "技-百花飄零", 63: "人-小喬", 64: "技-笑裡藏刀", 65: "人-曹焱兵", 66: "寵-寒刺熊", 67: "技-勢如破竹", 68: "人-袁紹", 69: "技-輕勇飛鈴", 70: "人-周瑜", 71: "技-蝶影飛舞", 72: "人-曹焱兵", 73: "技-草船借箭", 74: "人-張郃", 75: "寵-震天虎", 76: "技-怒髮衝冠", 77: "人-袁紹", 78: "技-地火轟雷", 79: "人-郭嘉", 80: "技-瞬移暴擊", 81: "人-曹焱兵", 82: "技-雪羽飄零", 83: "人-張郃", 84: "寵-寒刺熊", 85: "技-輕勇飛鈴", 86: "人-馬雲祿", 87: "技-笑裡藏刀", 88: "人-馬超", 89: "技-混亂降法", 90: "人-甄宓", 91: "技-一錘定音", 92: "人-周泰", 93: "寵-震天虎", 94: "技-電閃雷鳴", 95: "人-貂蟬", 96: "技-草船借箭", 97: "人-祝融", 98: "技-橫槍躍馬", 99: "人-步練師", 100: "技-風捲殘雲", 101: "人-呂玲綺", 102: "寵-閃炫獅", 103: "技-天妒纏鎖", 104: "人-太史慈", 105: "技-烈刃之息", 106: "人-典韋", 107: "技-威震蒼穹", 108: "人-夏侯惇", 109: "技-笑裡藏刀", 110: "人-曹焱兵", 111: "寵-炎鹿", 112: "技-勢如破竹", 113: "人-左慈", 114: "技-遠交近攻", 115: "人-袁紹", 116: "技-翻天覆地", 117: "人-曹焱兵", 118: "技-輕勇飛鈴", 119: "人-張飛", 120: "寵-炎鹿", 121: "技-一錘定音", 122: "人-馬雲祿", 123: "技-地火轟雷", 124: "人-曹焱兵", 125: "技-混亂降法", 126: "人-關銀屏", 127: "技-風捲殘雲", 128: "人-周泰", 129: "寵-震天虎", 130: "技-遠交近攻", 131: "人-祝融", 132: "技-雪羽飄零", 133: "人-呂玲綺", 134: "技-烈刃之息", 135: "人-步練師", 136: "技-雪羽飄零", 137: "人-祝融", 138: "寵-羽石精靈", 139: "技-烈刃之息", 140: "人-馬雲祿", 141: "技-嶄露鋒芒", 142: "人-夏侯惇", 143: "技-混亂降法", 144: "人-甘寧", 145: "技-瞬移暴擊", 146: "人-關羽", 147: "寵-閃炫獅", 148: "技-遠交近攻", 149: "人-袁紹", 150: "技-草船借箭", 151: "技-輕勇飛鈴", 152: "人-步練師", 153: "技-威震蒼穹", 154: "人-張郃", 155: "技-如火燎原", 156: "寵-炎鹿", 157: "人-太史慈", 158: "技-笑裡藏刀", 159: "人-左慈", 160: "技-風捲殘雲", 161: "技-怒吼威脅", 162: "技-一錘定音", 163: "技-電閃雷鳴", 164: "技-怒髮衝冠", 165: "寵-震天虎", 166: "技-瞬移暴擊", 167: "人-呂玲綺", 168: "技-天妒纏鎖", 169: "人-曹焱兵", 170: "技-烈刃之息", 171: "人-馬雲祿", 172: "技-遠交近攻", 173: "人-夏侯惇", 174: "寵-炎鹿", 175: "技-草船借箭", 176: "人-甄宓", 177: "技-百花飄零", 178: "人-周泰", 179: "技-地火轟雷", 180: "人-袁紹", 181: "技-勢如破竹", 182: "人-孫尚香", 183: "寵-閃炫獅", 184: "技-輕勇飛鈴", 185: "人-步練師", 186: "技-威震蒼穹", 187: "人-張郃", 188: "技-如火燎原", 189: "人-甘寧", 190: "技-蝶影飛舞", 191: "人-左慈", 192: "寵-寒刺熊", 193: "技-電閃雷鳴", 194: "人-關銀屏", 195: "技-翻天覆地", 196: "人-貂蟬", 197: "技-遠交近攻", 198: "人-周瑜", 199: "技-風捲殘雲", 200: "人-呂玲綺", 201: "寵-羽石精靈", 202: "技-怒髮衝冠", 203: "人-祝融", 204: "技-烈刃之息", 205: "人-小喬", 206: "技-一錘定音", 207: "人-夏侯惇", 208: "技-翻天覆地", 209: "人-張遼", 210: "寵-震天虎", 211: "技-威震蒼穹", 212: "人-馬雲祿", 213: "技-電閃雷鳴", 214: "人-祝融", 215: "技-怒吼威脅", 216: "人-關銀屏", 217: "技-風捲殘雲", 218: "人-周泰", 219: "寵-震天虎", 220: "技-雪羽飄零", 221: "人-大喬", 222: "技-瞬移暴擊", 223: "人-呂玲綺", 224: "技-如火燎原", 225: "人-太史慈", 226: "技-烈刃之息", 227: "人-步練師", 228: "寵-閃炫獅", 229: "技-地火轟雷", 230: "人-夏侯惇", 231: "技-翻天覆地", 232: "人-甄宓", 233: "技-百花飄零", 234: "人-左慈", 235: "技-一錘定音", 236: "人-袁紹", 237: "寵-羽石精靈", 238: "技-怒髮衝冠", 239: "人-貂蟬", 240: "技-輕勇飛鈴", 241: "人-郭嘉", 242: "技-蝶影飛舞", 243: "人-張郃", 244: "技-混亂降法", 245: "人-祝融", 246: "寵-寒刺熊", 247: "技-笑裡藏刀", 248: "人-小喬", 249: "技-電閃雷鳴", 250: "人-關銀屏", 251: "技-雪羽飄零", 252: "人-張遼", 253: "技-風捲殘雲", 254: "人-張飛", 255: "寵-震天虎", 256: "技-笑裡藏刀", 257: "人-張郃", 258: "技-怒髮衝冠", 259: "人-張遼", 260: "技-穿雲裂石", 261: "人-小喬", 262: "技-電閃雷鳴", 263: "人-甄宓", 264: "寵-寒刺熊", 265: "技-連環火攻", 266: "人-貂蟬", 267: "技-風捲殘雲", 268: "人-周泰", 269: "技-一錘定音", 270: "人-呂玲綺", 271: "人-關羽", 272: "技-地火轟雷", 273: "人-孫尚香", 274: "技-怒髮衝冠", 275: "人-張郃", 276: "寵-羽石精靈", 277: "技-翻天覆地", 278: "人-呂玲綺", 279: "技-烈刃之息", 280: "人-周泰", 281: "技-一錘定音", 282: "人-曹焱兵", 283: "技-怒髮衝冠", 284: "人-夏侯惇", 285: "寵-羽石精靈", 286: "技-百花飄零", 287: "人-步練師", 288: "技-風捲殘雲", 289: "人-大喬", 290: "技-草船借箭", 291: "人-袁紹", 292: "技-輕勇飛鈴", 293: "人-左慈", 294: "寵-閃炫獅", 295: "技-瞬移暴擊", 296: "人-貂蟬", 297: "技-雪羽飄零", 298: "人-張郃", 299: "技-笑裡藏刀", 300: "人-張飛", 301: "技-電閃雷鳴", 302: "人-甄宓", 303: "寵-震天虎", 304: "技-混亂降法", 305: "人-關銀屏", 306: "技-蝶影飛舞", 307: "人-小喬", 308: "技-穿雲裂石", 309: "人-張遼", 310: "技-如火燎原", 311: "人-呂玲綺", 312: "寵-炎鹿", 313: "技-烈刃之息", 314: "人-典韋", 315: "技-地火轟雷", 316: "人-祝融", 317: "技-連環火攻", 318: "人-夏侯惇", 319: "技-百花飄零", 320: "人-馬雲祿", 321: "寵-寒刺熊", 322: "技-雪羽飄零", 323: "人-呂玲綺", 324: "技-烈刃之息", 325: "人-馬雲祿", 326: "技-橫槍躍馬", 327: "人-張遼", 328: "技-翻天覆地", 329: "人-夏侯惇", 330: "寵-炎鹿", 331: "技-百花飄零", 332: "人-小喬", 333: "技-威震蒼穹", 334: "人-曹焱兵", 335: "技-怒髮衝冠", 336: "人-袁紹", 337: "技-輕勇飛鈴", 338: "人-步練師", 339: "寵-震天虎", 340: "技-地火轟雷", 341: "人-大喬", 342: "技-勢如破竹", 343: "人-張郃", 344: "技-笑裡藏刀", 345: "人-典韋", 346: "技-蝶影飛舞", 347: "人-左慈", 348: "寵-閃炫獅", 349: "技-草船借箭", 350: "人-關銀屏", 351: "技-一錘定音", 352: "人-小喬", 353: "技-遠交近攻", 354: "人-孫尚香", 355: "技-如火燎原", 356: "人-呂玲綺", 357: "寵-羽石精靈", 358: "技-烈刃之息", 359: "人-周泰", 360: "技-穿雲裂石", 361: "人-甄宓", 362: "技-混亂降法", 363: "人-夏侯惇", 364: "技-百花飄零", 365: "人-馬雲祿", 366: "寵-寒刺熊", 367: "技-威震蒼穹", 368: "人-馬超", 369: "技-雪羽飄零", 370: "人-袁紹", 371: "技-輕勇飛鈴", 372: "人-周泰", 373: "技-地火轟雷", 374: "人-祝融", 375: "寵-震天虎", 376: "技-連環火攻", 377: "人-張郃", 378: "技-笑裡藏刀", 379: "人-步練師", 380: "技-蝶影飛舞", 381: "人-曹焱兵", 382: "技-怒髮衝冠", 383: "人-關銀屏", 384: "寵-炎鹿", 385: "技-瞬移暴擊", 386: "人-左慈", 387: "技-嶄露鋒芒", 388: "人-大喬", 389: "技-翻天覆地", 390: "人-呂玲綺", 391: "技-烈刃之息", 392: "人-周泰", 393: "寵-閃炫獅", 394: "技-一錘定音", 395: "人-張飛", 396: "技-草船借箭", 397: "人-夏侯惇", 398: "技-百花飄零", 399: "人-小喬", 400: "技-威震蒼穹", 401: "人-甄宓", 402: "寵-寒刺熊", 403: "技-如火燎原", 404: "人-袁紹", 405: "技-輕勇飛鈴" };
-    const uniqueItems = Array.from(new Set(Object.values(dataObj))).sort();
     
-    // 需標註為紅色的武將清單
+    const uniqueItems = Array.from(new Set(Object.values(dataObj))).sort();
     const redNames = ["曹焱兵", "甘寧", "步練師", "馬超", "關羽", "周泰", "太史慈"];
 
     function triggerSearch() {
-        const v1 = document.getElementById('input1').value;
-        const v2 = document.getElementById('input2').value;
+        const v1 = document.getElementById('input1').value.trim();
+        const v2 = document.getElementById('input2').value.trim();
         const wrapper = document.getElementById('resultsWrapper');
+        const tabBox = document.getElementById('tabsContainer');
+        
         wrapper.innerHTML = ''; 
+        tabBox.innerHTML = '';
 
         if(!v1 || !v2) return;
 
         const matches = Object.keys(dataObj).filter(k => dataObj[k] === v1 && dataObj[parseInt(k)+1] === v2).map(Number);
         
         if(matches.length === 0) {
-            wrapper.innerHTML = '<div style="text-align:center; color:#ea4335; margin-top:60px;">❌ 找不到對應序列</div>';
+            wrapper.innerHTML = `<div style="text-align:center; margin-top:100px; color:var(--highlight-red);">❌ 找不到對應序列</div>`;
             return;
         }
 
         matches.forEach((m, idx) => {
+            const tBtn = document.createElement('button');
+            tBtn.className = `tab-btn ${idx === 0 ? 'active' : ''}`;
+            tBtn.innerText = `結果 ${idx + 1} (#${m})`;
+            tBtn.onclick = () => switchTab(idx);
+            tabBox.appendChild(tBtn);
+
+            const nextTarget = dataObj[m+2] || '已到盡頭';
             const panel = document.createElement('div');
-            panel.className = 'result-panel';
+            panel.className = `result-panel ${idx === 0 ? 'active' : ''}`;
+            panel.id = `panel-${idx}`;
             panel.innerHTML = `
-                <div class="panel-header">結果 ${idx + 1}：定位 #${m}</div>
+                <div class="panel-header">
+                    <div class="panel-title"><i class="fa-solid fa-location-crosshairs"></i> 定位 #${m}</div>
+                    <div class="predict-badge"><i class="fa-solid fa-bolt"></i> 下一張：${nextTarget}</div>
+                </div>
                 <div class="scroll-window">
                     <div class="sequence-grid" id="grid-${idx}"></div>
                 </div>
@@ -128,72 +215,94 @@
             wrapper.appendChild(panel);
 
             const grid = document.getElementById(`grid-${idx}`);
+            const fragment = document.createDocumentFragment();
             for(let i=1; i<=405; i++) {
                 const card = document.createElement('div');
                 card.className = 'item-card';
                 card.id = `panel-${idx}-item-${i}`;
-                
-                const content = dataObj[i];
+                let content = dataObj[i];
                 let contentHTML = `<b>${content}</b>`;
-                
-                if(redNames.some(name => content.includes(name))) {
-                    contentHTML = `<b class="special-name">${content}</b>`;
-                }
-
+                if(redNames.some(name => content.includes(name))) contentHTML = `<b class="special-name">${content}</b>`;
                 if(i === m || i === m+1) card.classList.add('match-active');
                 else if(i === m+2) card.classList.add('predict-active');
-
                 card.innerHTML = `<span class="id-tag">#${i}</span>${contentHTML}`;
-                grid.appendChild(card);
+                fragment.appendChild(card);
             }
+            grid.appendChild(fragment);
 
-            setTimeout(() => {
-                const target = document.getElementById(`panel-${idx}-item-${m}`);
-                if(target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }, 100);
+            if(idx === 0) scrollToCenter(idx, m);
         });
+    }
+
+    function switchTab(idx) {
+        document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
+        document.querySelectorAll('.result-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
+        
+        const m = parseInt(document.querySelectorAll('.tab-btn')[idx].innerText.match(/#(\d+)/)[1]);
+        scrollToCenter(idx, m);
+    }
+
+    function scrollToCenter(panelIdx, m) {
+        setTimeout(() => {
+            const target = document.getElementById(`panel-${panelIdx}-item-${m}`);
+            if(target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
     }
 
     function resetAll() {
         document.getElementById('input1').value = '';
         document.getElementById('input2').value = '';
-        document.getElementById('resultsWrapper').innerHTML = '<div style="text-align:center; color:#999; margin-top:60px;">請輸入查詢內容，指定武將將以紅色標註<br>(往下滾動時，搜尋列會固定在最上方)</div>';
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function getPossibleNext(v1) {
-        if(!v1) return uniqueItems;
-        return Array.from(new Set(Object.keys(dataObj).filter(k => dataObj[k] === v1).map(k => dataObj[parseInt(k)+1]).filter(v => v)));
+        document.getElementById('tabsContainer').innerHTML = '';
+        document.getElementById('resultsWrapper').innerHTML = `
+            <div style="text-align:center; color:#94a3b8; margin-top:100px;">
+                <i class="fa-solid fa-chart-line" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                <div>請輸入連兩筆抽取紀錄以定位序列</div>
+            </div>`;
     }
 
     function setupSuggest(id, lid) {
         const input = document.getElementById(id), list = document.getElementById(lid);
-        input.onfocus = input.oninput = () => {
+        input.onfocus = () => {
+            // 如果是第二個框，點選時清空文字
+            if(id === 'input2') input.value = '';
+            
+            showList();
+        };
+
+        input.oninput = () => showList();
+
+        function showList() {
             list.innerHTML = '';
-            let opts = (id === 'input1') ? uniqueItems : getPossibleNext(document.getElementById('input1').value);
-            const filtered = opts.filter(o => o.includes(input.value));
+            let val = (id === 'input1') ? '' : document.getElementById('input1').value.trim();
+            let opts = (id === 'input1') ? uniqueItems : Array.from(new Set(Object.keys(dataObj).filter(k => dataObj[k] === val).map(k => dataObj[parseInt(k)+1]).filter(v => v)));
+            const filtered = opts.filter(o => o.includes(input.value.trim()));
             filtered.forEach(f => {
                 const d = document.createElement('div');
                 d.className = 'suggest-item';
                 d.innerText = f;
-                d.onclick = () => { 
-                    input.value = f; 
-                    list.style.display = 'none'; 
-                    if(id === 'input1') document.getElementById('input2').focus(); 
-                    else triggerSearch(); 
-                };
+                d.onclick = () => { input.value = f; list.style.display = 'none'; id === 'input1' ? document.getElementById('input2').focus() : triggerSearch(); };
                 list.appendChild(d);
             });
             list.style.display = filtered.length ? 'block' : 'none';
-        };
+        }
+
+        input.onblur = () => setTimeout(() => list.style.display = 'none', 150);
     }
 
-    document.addEventListener('click', (e) => { 
-        if(!e.target.closest('.input-wrapper')) document.querySelectorAll('.suggestions').forEach(s => s.style.display='none'); 
-    });
-    
-    setupSuggest('input1', 'list1');
-    setupSuggest('input2', 'list2');
+    function setupVoiceInput(btnId, inputId) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) { document.getElementById(btnId).style.display = 'none'; return; }
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'zh-TW';
+        const btn = document.getElementById(btnId), input = document.getElementById(inputId);
+        btn.onclick = () => { btn.classList.contains('recording') ? recognition.stop() : recognition.start(); };
+        recognition.onstart = () => btn.classList.add('recording');
+        recognition.onresult = (e) => { input.value = e.results[0][0].transcript.replace(/[。，、]/g, ''); input.focus(); };
+        recognition.onend = () => btn.classList.remove('recording');
+    }
+
+    setupSuggest('input1', 'list1'); setupSuggest('input2', 'list2');
+    setupVoiceInput('mic1', 'input1'); setupVoiceInput('mic2', 'input2');
 </script>
 
 </body>
