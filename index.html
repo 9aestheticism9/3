@@ -45,6 +45,8 @@
         h1 { margin: 0; font-size: 22px; font-weight: 800; color: var(--primary); display: flex; align-items: center; justify-content: center; gap: 8px;}
         
         .search-section { background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
+        
+        /* 修改這裡：預設為電腦版單行排列 */
         .search-grid { display: flex; gap: 12px; align-items: center; }
         .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
@@ -63,6 +65,21 @@
         .btn { padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
         .btn-search { background: var(--primary); color: white; }
         .btn-reset { background: #e2e8f0; color: var(--text-main); }
+
+        /* 新增手機版專屬排版優化 */
+        @media (max-width: 600px) {
+            .search-grid {
+                flex-direction: column; /* 讓輸入框和按鈕上下排列 */
+                align-items: stretch;
+            }
+            .action-btns {
+                width: 100%; /* 讓按鈕區域填滿寬度 */
+            }
+            .btn {
+                flex: 1; /* 讓兩個按鈕各佔 50% 寬度 */
+                justify-content: center; /* 按鈕文字置中 */
+            }
+        }
 
         .tabs-container {
             display: flex;
@@ -105,7 +122,7 @@
         }
         .result-panel.active { display: flex; flex-direction: column; }
 
-        .panel-header { padding: 15px 20px; background: var(--match-bg); border-bottom: 1px solid var(--match-border); display: flex; justify-content: space-between; align-items: center; }
+        .panel-header { padding: 15px 20px; background: var(--match-bg); border-bottom: 1px solid var(--match-border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .panel-title { color: var(--match-border); font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .predict-badge { background: var(--highlight-red); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
         
