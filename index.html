@@ -46,7 +46,6 @@
         
         .search-section { background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
         
-        /* 修改這裡：預設為電腦版單行排列 */
         .search-grid { display: flex; gap: 12px; align-items: center; }
         .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
@@ -66,18 +65,17 @@
         .btn-search { background: var(--primary); color: white; }
         .btn-reset { background: #e2e8f0; color: var(--text-main); }
 
-        /* 新增手機版專屬排版優化 */
         @media (max-width: 600px) {
             .search-grid {
-                flex-direction: column; /* 讓輸入框和按鈕上下排列 */
+                flex-direction: column;
                 align-items: stretch;
             }
             .action-btns {
-                width: 100%; /* 讓按鈕區域填滿寬度 */
+                width: 100%;
             }
             .btn {
-                flex: 1; /* 讓兩個按鈕各佔 50% 寬度 */
-                justify-content: center; /* 按鈕文字置中 */
+                flex: 1;
+                justify-content: center;
             }
         }
 
@@ -115,7 +113,7 @@
             background: var(--card-bg); 
             border-radius: 16px; 
             border: 1px solid var(--border); 
-            height: 500px; 
+            height: 550px; /* 稍微增加高度以容納更多卡片 */
             box-shadow: 0 10px 30px rgba(0,0,0,0.04); 
             overflow: hidden; 
             animation: slideUp 0.4s ease-out; 
@@ -126,13 +124,32 @@
         .panel-title { color: var(--match-border); font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
         .predict-badge { background: var(--highlight-red); color: white; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; }
         
-        .scroll-window { flex-grow: 1; overflow-y: auto; padding: 20px; scroll-behavior: smooth; }
-        .sequence-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-        @media (min-width: 600px) { .sequence-grid { grid-template-columns: repeat(4, 1fr); } }
+        .scroll-window { flex-grow: 1; overflow-y: auto; padding: 15px; scroll-behavior: smooth; }
+        
+        /* 修改這裡：手機預設改為 3 欄排列，間距稍微縮小 */
+        .sequence-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        @media (min-width: 600px) { .sequence-grid { grid-template-columns: repeat(5, 1fr); gap: 12px; } }
 
-        .item-card { border: 1px solid var(--border); padding: 12px; border-radius: 10px; background: #fafafa; font-size: 14px; position: relative; }
-        .id-tag { font-size: 11px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 600; }
-        .special-name { color: var(--highlight-red); font-weight: 800; }
+        /* 修改這裡：文字加大、內距微調 */
+        .item-card { 
+            border: 1px solid var(--border); 
+            padding: 8px 4px; /* 減少左右 padding 避免字被擠壓 */
+            border-radius: 8px; 
+            background: #fafafa; 
+            font-size: 16px; /* 主文字加大 */
+            font-weight: 600; /* 讓文字稍微加粗更清楚 */
+            position: relative; 
+            text-align: center; /* 置中排列在 3 欄模式下會更好看 */
+            line-height: 1.3;
+        }
+        .id-tag { 
+            font-size: 11px; /* 編號大小不變 */
+            color: var(--text-muted); 
+            display: block; 
+            margin-bottom: 2px; /* 減少與主文字的間距 */
+            font-weight: 600; 
+        }
+        .special-name { color: var(--highlight-red); font-weight: 900; }
         
         .match-active { border: 2px solid var(--match-border) !important; background: var(--match-bg) !important; z-index: 1; }
         .predict-active { background: var(--predict-bg) !important; border: 2px solid var(--predict-border) !important; transform: scale(1.05); z-index: 2; box-shadow: 0 4px 15px rgba(255, 77, 109, 0.2); }
