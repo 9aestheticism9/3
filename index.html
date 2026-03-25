@@ -50,8 +50,6 @@
         .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
         
         .input-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; }
-        .mic-btn { position: absolute; right: 10px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px; border-radius: 50%; transition: 0.2s; }
-        .mic-btn.recording { color: var(--highlight-red); animation: pulse 1.5s infinite; }
 
         input { 
             width: 100%; box-sizing: border-box; padding: 14px 40px; 
@@ -127,7 +125,6 @@
         .suggest-item:hover { background: var(--match-bg); color: var(--primary); }
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes pulse { 0% { transform: scale(1); } 70% { transform: scale(1.1); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
@@ -142,13 +139,11 @@
                 <div class="input-wrapper">
                     <i class="fa-solid fa-magnifying-glass input-icon"></i>
                     <input type="text" id="input1" placeholder="第一張" autocomplete="off">
-                    <button class="mic-btn" id="mic1" title="語音輸入"><i class="fa-solid fa-microphone"></i></button>
                     <div id="list1" class="suggestions"></div>
                 </div>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-layer-group input-icon"></i>
                     <input type="text" id="input2" placeholder="第二張" autocomplete="off" onfocus="this.value=''">
-                    <button class="mic-btn" id="mic2" title="語音輸入"><i class="fa-solid fa-microphone"></i></button>
                     <div id="list2" class="suggestions"></div>
                 </div>
             </div>
@@ -206,7 +201,7 @@
             panel.innerHTML = `
                 <div class="panel-header">
                     <div class="panel-title"><i class="fa-solid fa-location-crosshairs"></i> 定位 #${m}</div>
-                    <div class="predict-badge"><i class="fa-solid fa-bolt"></i> 下一張：${nextTarget}</div>
+                    <div class="predict-badge"><i class="fa-solid fa-bolt"></i> 下一張預測：${nextTarget}</div>
                 </div>
                 <div class="scroll-window">
                     <div class="sequence-grid" id="grid-${idx}"></div>
@@ -263,9 +258,7 @@
     function setupSuggest(id, lid) {
         const input = document.getElementById(id), list = document.getElementById(lid);
         input.onfocus = () => {
-            // 如果是第二個框，點選時清空文字
             if(id === 'input2') input.value = '';
-            
             showList();
         };
 
@@ -289,20 +282,7 @@
         input.onblur = () => setTimeout(() => list.style.display = 'none', 150);
     }
 
-    function setupVoiceInput(btnId, inputId) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) { document.getElementById(btnId).style.display = 'none'; return; }
-        const recognition = new SpeechRecognition();
-        recognition.lang = 'zh-TW';
-        const btn = document.getElementById(btnId), input = document.getElementById(inputId);
-        btn.onclick = () => { btn.classList.contains('recording') ? recognition.stop() : recognition.start(); };
-        recognition.onstart = () => btn.classList.add('recording');
-        recognition.onresult = (e) => { input.value = e.results[0][0].transcript.replace(/[。，、]/g, ''); input.focus(); };
-        recognition.onend = () => btn.classList.remove('recording');
-    }
-
     setupSuggest('input1', 'list1'); setupSuggest('input2', 'list2');
-    setupVoiceInput('mic1', 'input1'); setupVoiceInput('mic2', 'input2');
 </script>
 
 </body>
