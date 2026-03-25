@@ -2,19 +2,31 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>三國幻戰 - 序列對照工具</title>
     <style>
         :root { --primary: #1a73e8; --predict: #ffe4e8; --border: #dadce0; --bg: #f8f9fa; --reset: #5f6368; --highlight-red: #d93025; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
         
-        header { text-align: center; padding: 5px 0; flex-shrink: 0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; padding: 0; }
+        
+        /* 頂部固定區塊 */
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: var(--bg);
+            padding: 10px 10px 15px 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            border-bottom: 1px solid var(--border);
+        }
+
+        header { text-align: center; padding: 5px 0 10px 0; }
         h1 { margin: 0; color: #333; font-size: 24px; letter-spacing: 2px; }
         
-        .container { max-width: 900px; margin: auto; width: 100%; display: flex; flex-direction: column; height: 100%; }
+        .container { max-width: 900px; margin: auto; width: 100%; }
         
         /* 搜尋區 */
-        .search-section { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); flex-shrink: 0; margin-bottom: 10px; border: 1px solid var(--border); }
+        .search-section { background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
         .search-grid { display: flex; gap: 10px; align-items: flex-start; }
         .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .input-wrapper { position: relative; width: 100%; }
@@ -26,10 +38,10 @@
         .reset-btn:hover { background: #3c4043; }
 
         /* 結果顯示區域 */
-        #resultsWrapper { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 25px; padding-bottom: 30px; }
+        #resultsWrapper { padding: 20px 10px 40px 10px; display: flex; flex-direction: column; gap: 25px; max-width: 900px; margin: auto; }
         
         /* 獨立結果面板 */
-        .result-panel { background: white; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; height: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        .result-panel { background: white; border-radius: 12px; border: 1px solid var(--border); flex-shrink: 0; display: flex; flex-direction: column; height: 450px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; }
         .panel-header { padding: 10px 15px; background: #e8f0fe; color: #1967d2; font-size: 14px; font-weight: bold; border-bottom: 1px solid var(--border); }
         
         .scroll-window { flex-grow: 1; overflow-y: auto; padding: 12px; scroll-behavior: smooth; }
@@ -47,18 +59,17 @@
         .predict-active { background: var(--predict) !important; border-color: #ffccd5 !important; border-width: 2px; }
 
         /* 下拉建議 */
-        .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); z-index: 100; max-height: 200px; overflow-y: auto; border-radius: 8px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .suggestions { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); z-index: 2000; max-height: 200px; overflow-y: auto; border-radius: 8px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .suggest-item { padding: 12px; cursor: pointer; border-bottom: 1px solid #f1f1f1; font-size: 14px; }
         .suggest-item:hover { background: #f8f9fa; color: var(--primary); }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>三國幻戰4彈</h1>
-</header>
-
-<div class="container">
+<div class="sticky-top">
+    <header>
+        <h1>三國幻戰 4彈</h1>
+    </header>
     <div class="search-section">
         <div class="search-grid">
             <div class="inputs-group">
@@ -74,11 +85,12 @@
             <button class="reset-btn" onclick="resetAll()">重置</button>
         </div>
     </div>
+</div>
 
-    <div id="resultsWrapper">
-        <div style="text-align:center; color:#999; margin-top:100px;">
-            請輸入查詢內容，指定武將將以紅色標註
-        </div>
+<div id="resultsWrapper">
+    <div style="text-align:center; color:#999; margin-top:60px;">
+        請輸入查詢內容，指定武將將以紅色標註<br>
+        (往下滾動時，搜尋列會固定在最上方)
     </div>
 </div>
 
@@ -86,7 +98,7 @@
     const dataObj = { 1: "技-瞬移暴擊", 2: "人-大喬", 3: "寵-閃炫獅", 4: "技-翻天覆地", 5: "人-夏侯惇", 6: "技-百花飄零", 7: "人-左慈", 8: "技-笑裡藏刀", 9: "人-甘寧", 10: "技-草船借箭", 11: "人-袁紹", 12: "寵-炎鹿", 13: "技-輕勇飛鈴", 14: "人-小喬", 15: "技-地火轟雷", 16: "人-甄宓", 17: "技-天妒纏鎖", 18: "人-張郃", 19: "技-橫槍躍馬", 20: "人-郭嘉", 21: "寵-震天虎", 22: "技-電閃雷鳴", 23: "人-孫尚香", 24: "技-如火燎原", 25: "人-關銀屏", 26: "技-蝶影飛舞", 27: "人-馬雲祿", 28: "技-威震蒼穹", 29: "人-祝融", 30: "寵-寒刺熊", 31: "技-風捲殘雲", 32: "人-曹焱兵", 33: "技-草船借箭", 34: "人-袁紹", 35: "技-輕勇飛鈴", 36: "人-周泰", 37: "技-威震蒼穹", 38: "人-大喬", 39: "寵-震天虎", 40: "技-翻天覆地", 41: "人-張郃", 42: "技-蝶影飛舞", 43: "人-步練師", 44: "技-電閃雷鳴", 45: "人-馬超", 46: "技-怒髮衝冠", 47: "人-關銀屏", 48: "寵-炎鹿", 49: "技-瞬移暴擊", 50: "人-左慈", 51: "技-地火轟雷", 52: "人-貂蟬", 53: "技-如火燎原", 54: "人-呂玲綺", 55: "技-烈刃之息", 56: "寵-閃炫獅", 57: "人-關羽", 58: "技-嶄露鋒芒", 59: "人-甄宓", 60: "技-雪羽飄零", 61: "人-夏侯惇", 62: "技-百花飄零", 63: "人-小喬", 64: "技-笑裡藏刀", 65: "人-曹焱兵", 66: "寵-寒刺熊", 67: "技-勢如破竹", 68: "人-袁紹", 69: "技-輕勇飛鈴", 70: "人-周瑜", 71: "技-蝶影飛舞", 72: "人-曹焱兵", 73: "技-草船借箭", 74: "人-張郃", 75: "寵-震天虎", 76: "技-怒髮衝冠", 77: "人-袁紹", 78: "技-地火轟雷", 79: "人-郭嘉", 80: "技-瞬移暴擊", 81: "人-曹焱兵", 82: "技-雪羽飄零", 83: "人-張郃", 84: "寵-寒刺熊", 85: "技-輕勇飛鈴", 86: "人-馬雲祿", 87: "技-笑裡藏刀", 88: "人-馬超", 89: "技-混亂降法", 90: "人-甄宓", 91: "技-一錘定音", 92: "人-周泰", 93: "寵-震天虎", 94: "技-電閃雷鳴", 95: "人-貂蟬", 96: "技-草船借箭", 97: "人-祝融", 98: "技-橫槍躍馬", 99: "人-步練師", 100: "技-風捲殘雲", 101: "人-呂玲綺", 102: "寵-閃炫獅", 103: "技-天妒纏鎖", 104: "人-太史慈", 105: "技-烈刃之息", 106: "人-典韋", 107: "技-威震蒼穹", 108: "人-夏侯惇", 109: "技-笑裡藏刀", 110: "人-曹焱兵", 111: "寵-炎鹿", 112: "技-勢如破竹", 113: "人-左慈", 114: "技-遠交近攻", 115: "人-袁紹", 116: "技-翻天覆地", 117: "人-曹焱兵", 118: "技-輕勇飛鈴", 119: "人-張飛", 120: "寵-炎鹿", 121: "技-一錘定音", 122: "人-馬雲祿", 123: "技-地火轟雷", 124: "人-曹焱兵", 125: "技-混亂降法", 126: "人-關銀屏", 127: "技-風捲殘雲", 128: "人-周泰", 129: "寵-震天虎", 130: "技-遠交近攻", 131: "人-祝融", 132: "技-雪羽飄零", 133: "人-呂玲綺", 134: "技-烈刃之息", 135: "人-步練師", 136: "技-雪羽飄零", 137: "人-祝融", 138: "寵-羽石精靈", 139: "技-烈刃之息", 140: "人-馬雲祿", 141: "技-嶄露鋒芒", 142: "人-夏侯惇", 143: "技-混亂降法", 144: "人-甘寧", 145: "技-瞬移暴擊", 146: "人-關羽", 147: "寵-閃炫獅", 148: "技-遠交近攻", 149: "人-袁紹", 150: "技-草船借箭", 151: "技-輕勇飛鈴", 152: "人-步練師", 153: "技-威震蒼穹", 154: "人-張郃", 155: "技-如火燎原", 156: "寵-炎鹿", 157: "人-太史慈", 158: "技-笑裡藏刀", 159: "人-左慈", 160: "技-風捲殘雲", 161: "技-怒吼威脅", 162: "技-一錘定音", 163: "技-電閃雷鳴", 164: "技-怒髮衝冠", 165: "寵-震天虎", 166: "技-瞬移暴擊", 167: "人-呂玲綺", 168: "技-天妒纏鎖", 169: "人-曹焱兵", 170: "技-烈刃之息", 171: "人-馬雲祿", 172: "技-遠交近攻", 173: "人-夏侯惇", 174: "寵-炎鹿", 175: "技-草船借箭", 176: "人-甄宓", 177: "技-百花飄零", 178: "人-周泰", 179: "技-地火轟雷", 180: "人-袁紹", 181: "技-勢如破竹", 182: "人-孫尚香", 183: "寵-閃炫獅", 184: "技-輕勇飛鈴", 185: "人-步練師", 186: "技-威震蒼穹", 187: "人-張郃", 188: "技-如火燎原", 189: "人-甘寧", 190: "技-蝶影飛舞", 191: "人-左慈", 192: "寵-寒刺熊", 193: "技-電閃雷鳴", 194: "人-關銀屏", 195: "技-翻天覆地", 196: "人-貂蟬", 197: "技-遠交近攻", 198: "人-周瑜", 199: "技-風捲殘雲", 200: "人-呂玲綺", 201: "寵-羽石精靈", 202: "技-怒髮衝冠", 203: "人-祝融", 204: "技-烈刃之息", 205: "人-小喬", 206: "技-一錘定音", 207: "人-夏侯惇", 208: "技-翻天覆地", 209: "人-張遼", 210: "寵-震天虎", 211: "技-威震蒼穹", 212: "人-馬雲祿", 213: "技-電閃雷鳴", 214: "人-祝融", 215: "技-怒吼威脅", 216: "人-關銀屏", 217: "技-風捲殘雲", 218: "人-周泰", 219: "寵-震天虎", 220: "技-雪羽飄零", 221: "人-大喬", 222: "技-瞬移暴擊", 223: "人-呂玲綺", 224: "技-如火燎原", 225: "人-太史慈", 226: "技-烈刃之息", 227: "人-步練師", 228: "寵-閃炫獅", 229: "技-地火轟雷", 230: "人-夏侯惇", 231: "技-翻天覆地", 232: "人-甄宓", 233: "技-百花飄零", 234: "人-左慈", 235: "技-一錘定音", 236: "人-袁紹", 237: "寵-羽石精靈", 238: "技-怒髮衝冠", 239: "人-貂蟬", 240: "技-輕勇飛鈴", 241: "人-郭嘉", 242: "技-蝶影飛舞", 243: "人-張郃", 244: "技-混亂降法", 245: "人-祝融", 246: "寵-寒刺熊", 247: "技-笑裡藏刀", 248: "人-小喬", 249: "技-電閃雷鳴", 250: "人-關銀屏", 251: "技-雪羽飄零", 252: "人-張遼", 253: "技-風捲殘雲", 254: "人-張飛", 255: "寵-震天虎", 256: "技-笑裡藏刀", 257: "人-張郃", 258: "技-怒髮衝冠", 259: "人-張遼", 260: "技-穿雲裂石", 261: "人-小喬", 262: "技-電閃雷鳴", 263: "人-甄宓", 264: "寵-寒刺熊", 265: "技-連環火攻", 266: "人-貂蟬", 267: "技-風捲殘雲", 268: "人-周泰", 269: "技-一錘定音", 270: "人-呂玲綺", 271: "人-關羽", 272: "技-地火轟雷", 273: "人-孫尚香", 274: "技-怒髮衝冠", 275: "人-張郃", 276: "寵-羽石精靈", 277: "技-翻天覆地", 278: "人-呂玲綺", 279: "技-烈刃之息", 280: "人-周泰", 281: "技-一錘定音", 282: "人-曹焱兵", 283: "技-怒髮衝冠", 284: "人-夏侯惇", 285: "寵-羽石精靈", 286: "技-百花飄零", 287: "人-步練師", 288: "技-風捲殘雲", 289: "人-大喬", 290: "技-草船借箭", 291: "人-袁紹", 292: "技-輕勇飛鈴", 293: "人-左慈", 294: "寵-閃炫獅", 295: "技-瞬移暴擊", 296: "人-貂蟬", 297: "技-雪羽飄零", 298: "人-張郃", 299: "技-笑裡藏刀", 300: "人-張飛", 301: "技-電閃雷鳴", 302: "人-甄宓", 303: "寵-震天虎", 304: "技-混亂降法", 305: "人-關銀屏", 306: "技-蝶影飛舞", 307: "人-小喬", 308: "技-穿雲裂石", 309: "人-張遼", 310: "技-如火燎原", 311: "人-呂玲綺", 312: "寵-炎鹿", 313: "技-烈刃之息", 314: "人-典韋", 315: "技-地火轟雷", 316: "人-祝融", 317: "技-連環火攻", 318: "人-夏侯惇", 319: "技-百花飄零", 320: "人-馬雲祿", 321: "寵-寒刺熊", 322: "技-雪羽飄零", 323: "人-呂玲綺", 324: "技-烈刃之息", 325: "人-馬雲祿", 326: "技-橫槍躍馬", 327: "人-張遼", 328: "技-翻天覆地", 329: "人-夏侯惇", 330: "寵-炎鹿", 331: "技-百花飄零", 332: "人-小喬", 333: "技-威震蒼穹", 334: "人-曹焱兵", 335: "技-怒髮衝冠", 336: "人-袁紹", 337: "技-輕勇飛鈴", 338: "人-步練師", 339: "寵-震天虎", 340: "技-地火轟雷", 341: "人-大喬", 342: "技-勢如破竹", 343: "人-張郃", 344: "技-笑裡藏刀", 345: "人-典韋", 346: "技-蝶影飛舞", 347: "人-左慈", 348: "寵-閃炫獅", 349: "技-草船借箭", 350: "人-關銀屏", 351: "技-一錘定音", 352: "人-小喬", 353: "技-遠交近攻", 354: "人-孫尚香", 355: "技-如火燎原", 356: "人-呂玲綺", 357: "寵-羽石精靈", 358: "技-烈刃之息", 359: "人-周泰", 360: "技-穿雲裂石", 361: "人-甄宓", 362: "技-混亂降法", 363: "人-夏侯惇", 364: "技-百花飄零", 365: "人-馬雲祿", 366: "寵-寒刺熊", 367: "技-威震蒼穹", 368: "人-馬超", 369: "技-雪羽飄零", 370: "人-袁紹", 371: "技-輕勇飛鈴", 372: "人-周泰", 373: "技-地火轟雷", 374: "人-祝融", 375: "寵-震天虎", 376: "技-連環火攻", 377: "人-張郃", 378: "技-笑裡藏刀", 379: "人-步練師", 380: "技-蝶影飛舞", 381: "人-曹焱兵", 382: "技-怒髮衝冠", 383: "人-關銀屏", 384: "寵-炎鹿", 385: "技-瞬移暴擊", 386: "人-左慈", 387: "技-嶄露鋒芒", 388: "人-大喬", 389: "技-翻天覆地", 390: "人-呂玲綺", 391: "技-烈刃之息", 392: "人-周泰", 393: "寵-閃炫獅", 394: "技-一錘定音", 395: "人-張飛", 396: "技-草船借箭", 397: "人-夏侯惇", 398: "技-百花飄零", 399: "人-小喬", 400: "技-威震蒼穹", 401: "人-甄宓", 402: "寵-寒刺熊", 403: "技-如火燎原", 404: "人-袁紹", 405: "技-輕勇飛鈴" };
     const uniqueItems = Array.from(new Set(Object.values(dataObj))).sort();
     
-    // 需要標註為紅色的武將名單
+    // 需標註為紅色的武將清單
     const redNames = ["曹焱兵", "甘寧", "步練師", "馬超", "關羽", "周泰", "太史慈"];
 
     function triggerSearch() {
@@ -100,7 +112,7 @@
         const matches = Object.keys(dataObj).filter(k => dataObj[k] === v1 && dataObj[parseInt(k)+1] === v2).map(Number);
         
         if(matches.length === 0) {
-            wrapper.innerHTML = '<div style="text-align:center; color:#ea4335; margin-top:100px;">❌ 找不到對應序列</div>';
+            wrapper.innerHTML = '<div style="text-align:center; color:#ea4335; margin-top:60px;">❌ 找不到對應序列</div>';
             return;
         }
 
@@ -124,7 +136,6 @@
                 const content = dataObj[i];
                 let contentHTML = `<b>${content}</b>`;
                 
-                // 檢查是否為需要變紅色的武將
                 if(redNames.some(name => content.includes(name))) {
                     contentHTML = `<b class="special-name">${content}</b>`;
                 }
@@ -146,7 +157,8 @@
     function resetAll() {
         document.getElementById('input1').value = '';
         document.getElementById('input2').value = '';
-        document.getElementById('resultsWrapper').innerHTML = '<div style="text-align:center; color:#999; margin-top:100px;">請輸入查詢內容，指定武將將以紅色標註</div>';
+        document.getElementById('resultsWrapper').innerHTML = '<div style="text-align:center; color:#999; margin-top:60px;">請輸入查詢內容，指定武將將以紅色標註<br>(往下滾動時，搜尋列會固定在最上方)</div>';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function getPossibleNext(v1) {
