@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -46,10 +46,31 @@
         
         .search-section { background: var(--card-bg); padding: 15px; border-radius: 16px; border: 1px solid var(--border); max-width: 900px; margin: auto; }
         
+        .search-grid { display: flex; gap: 12px; align-items: center; }
+        .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
+        
+        .input-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; }
+
+        input { 
+            width: 100%; box-sizing: border-box; padding: 14px 40px; 
+            border: 2px solid var(--border); border-radius: 12px; 
+            font-size: 15px; outline: none; transition: all 0.3s ease; 
+            background: #f8fafc;
+        }
+        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(71, 114, 250, 0.1); }
+        
+        .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
+        .btn { padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .btn-search { background: #e2e8f0; color:  var(--text-main); }
+        .btn-reset { background: #e2e8f0; color: var(--text-main); }
+
+        /* A/B 卡切換按鈕樣式，調整了上間距與下間距 */
         .dataset-toggle {
             display: flex;
             gap: 12px;
-            margin-bottom: 15px;
+            margin-top: 15px; /* 改為與上方搜尋欄保持距離 */
+            margin-bottom: 5px;
         }
         .toggle-btn {
             flex: 1;
@@ -73,29 +94,24 @@
             box-shadow: 0 4px 10px rgba(0, 136, 168, 0.3);
         }
 
-        .search-grid { display: flex; gap: 12px; align-items: center; }
-        .inputs-group { flex-grow: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .input-wrapper { position: relative; width: 100%; display: flex; align-items: center; }
-        
-        .input-icon { position: absolute; left: 14px; color: var(--text-muted); pointer-events: none; }
-
-        input { 
-            width: 100%; box-sizing: border-box; padding: 14px 40px; 
-            border: 2px solid var(--border); border-radius: 12px; 
-            font-size: 15px; outline: none; transition: all 0.3s ease; 
-            background: #f8fafc;
+        @media (max-width: 600px) {
+            .search-grid {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .action-btns {
+                width: 100%;
+            }
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
         }
-        input:focus { border-color: var(--primary); background: #fff; box-shadow: 0 0 0 4px rgba(71, 114, 250, 0.1); }
-        
-        .action-btns { display: flex; gap: 8px; flex-shrink: 0; }
-        .btn { padding: 14px 20px; border-radius: 12px; border: none; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
-        .btn-search { background: var(--primary); color: white; }
-        .btn-reset { background: #e2e8f0; color: var(--text-main); }
 
         .tabs-container {
             display: flex;
             gap: 10px;
-            margin-top: 15px;
+            margin-top: 10px;
             overflow-x: auto;
             padding-bottom: 5px;
             max-width: 900px;
@@ -166,10 +182,6 @@
 <div class="sticky-top">
     <header><h1>三國幻戰 序列工具</h1></header>
     <div class="search-section">
-        <div class="dataset-toggle">
-            <button id="btnA" class="toggle-btn active" onclick="switchDataset('A')">A 卡</button>
-            <button id="btnB" class="toggle-btn" onclick="switchDataset('B')">B 卡</button>
-        </div>
         <div class="search-grid">
             <div class="inputs-group">
                 <div class="input-wrapper">
@@ -188,6 +200,12 @@
                 <button class="btn btn-reset" onclick="resetAll()">重置</button>
             </div>
         </div>
+
+        <div class="dataset-toggle">
+            <button id="btnA" class="toggle-btn active" onclick="switchDataset('A')">A 卡</button>
+            <button id="btnB" class="toggle-btn" onclick="switchDataset('B')">B 卡</button>
+        </div>
+        
         <div id="tabsContainer" class="tabs-container"></div>
     </div>
 </div>
@@ -301,7 +319,6 @@
         document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx));
         document.querySelectorAll('.result-panel').forEach((p, i) => p.classList.toggle('active', i === idx));
         
-        // 修正：切換分頁時，讀取按鈕上的定位號碼並觸發自動捲動
         const btnText = document.querySelectorAll('.tab-btn')[idx].innerText;
         const match = btnText.match(/#(\d+)/);
         if (match) {
@@ -320,7 +337,11 @@
         document.getElementById('input1').value = '';
         document.getElementById('input2').value = '';
         document.getElementById('tabsContainer').innerHTML = '';
-        document.getElementById('resultsWrapper').innerHTML = '';
+        document.getElementById('resultsWrapper').innerHTML = `
+            <div style="text-align:center; color:#94a3b8; margin-top:100px;">
+                <i class="fa-solid fa-chart-line" style="font-size: 40px; color: #cbd5e1; margin-bottom: 15px;"></i>
+                <div>請輸入連兩筆抽取紀錄以定位序列</div>
+            </div>`;
     }
 
     function setupSuggest(id, lid) {
